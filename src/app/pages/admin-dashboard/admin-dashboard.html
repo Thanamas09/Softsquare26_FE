@@ -1,137 +1,232 @@
-<main>
-  <nav>
-    <strong>Admin: {{ auth.user?.fullName }}</strong>
-    <a routerLink="/admin/dashboard">Dashboard</a>
-    <a routerLink="/admin/menu">Menu</a>
-    <button type="button" (click)="auth.logout()">Logout</button>
+<main class="app-shell">
+  <nav class="topbar">
+    <a class="brand" routerLink="/admin/dashboard">
+      <span class="brand-icon">⚡</span>
+      <span>FoodFlow Admin</span>
+    </a>
+
+    <div class="nav-links">
+      <a routerLink="/admin/dashboard" class="active">Dashboard</a>
+      <a routerLink="/admin/menu">Menu</a>
+    </div>
+
+    <div class="profile-chip">
+      <span class="avatar">{{ auth.initials() }}</span>
+      <span>{{ auth.user?.fullName }}</span>
+      <button class="btn btn-ghost btn-small" type="button" (click)="auth.logout()">Logout</button>
+    </div>
   </nav>
 
-  <h1>Admin Dashboard</h1>
-
-  @if (summary) {
-    <section class="stats">
-      <p>Total: {{ summary.totalOrders }}</p>
-      <p>Pending: {{ summary.pendingOrders }}</p>
-      <p>Completed: {{ summary.completedOrders }}</p>
-      <p>Cancelled: {{ summary.cancelledOrders }}</p>
-      <p>Sales: {{ summary.totalSales | number:'1.2-2' }}</p>
-    </section>
-  }
+  <section class="page-header split-header">
+    <div>
+      <p class="eyebrow">Admin dashboard</p>
+      <h1>ภาพรวมออเดอร์และยอดขาย</h1>
+      <p class="muted">จัดการสถานะออเดอร์ แก้ไขรายการ Pending และดูสินค้าขายดีจาก Backend</p>
+    </div>
+    <button class="btn btn-soft" type="button" (click)="load()">Refresh data</button>
+  </section>
 
   @if (message) {
-    <p class="success">{{ message }}</p>
+    <div class="alert alert-success">{{ message }}</div>
   }
   @if (error) {
-    <p class="error">{{ error }}</p>
+    <div class="alert alert-error">{{ error }}</div>
+  }
+
+  @if (summary; as s) {
+    <section class="stats-grid">
+      <article class="stat-card card">
+        <span>Total Orders</span>
+        <strong>{{ s.totalOrders }}</strong>
+        <small>orders</small>
+      </article>
+      <article class="stat-card card accent-warning">
+        <span>Pending</span>
+        <strong>{{ s.pendingOrders }}</strong>
+        <small>waiting</small>
+      </article>
+      <article class="stat-card card accent-success">
+        <span>Completed</span>
+        <strong>{{ s.completedOrders }}</strong>
+        <small>done</small>
+      </article>
+      <article class="stat-card card accent-danger">
+        <span>Cancelled</span>
+        <strong>{{ s.cancelledOrders }}</strong>
+        <small>cancelled</small>
+      </article>
+      <article class="stat-card card accent-money">
+        <span>Total Sales</span>
+        <strong>฿{{ s.totalSales | number:'1.0-0' }}</strong>
+        <small>completed only</small>
+      </article>
+    </section>
+  } @else if (loading) {
+    <div class="empty-state card">กำลังโหลด Dashboard...</div>
   }
 
   @if (editingId) {
-    <form [formGroup]="form" (ngSubmit)="save()">
-      <h2>Edit Order #{{ editingId }}</h2>
+    <section class="card edit-panel">
+      <div class="section-title">
+        <div>
+          <p class="eyebrow">Edit pending order</p>
+          <h2>แก้ไข Order #{{ editingId }}</h2>
+        </div>
+        <button class="btn btn-ghost btn-small" type="button" (click)="reset()">Close</button>
+      </div>
 
-      <label>
-        Customer ID
-        <input formControlName="customerId" type="number" min="1" />
-      </label>
-
-      <label>
-        Title
-        <input formControlName="title" />
-      </label>
-
-      <label>
-        Description
-        <input formControlName="description" />
-      </label>
-
-      <label>
-        Type
-        <select formControlName="type">
-          <option value="Dine-in">Dine-in</option>
-          <option value="Takeaway">Takeaway</option>
-          <option value="Delivery">Delivery</option>
-        </select>
-      </label>
-
-      <label>
-        Product
-        <select formControlName="productId">
-          @for (product of products; track product.productId) {
-            <option [ngValue]="product.productId">{{ product.productName }}</option>
-          }
-        </select>
-      </label>
-
-      <label>
-        Quantity
-        <input formControlName="quantity" type="number" min="1" />
-      </label>
-
-      <button type="submit">Save order</button>
-      <button type="button" (click)="reset()">Cancel edit</button>
-    </form>
-  }
-
-  <h2>Orders</h2>
-  <table>
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>Customer</th>
-        <th>Order</th>
-        <th>Items</th>
-        <th>Total</th>
-        <th>Status</th>
-        <th></th>
-      </tr>
-    </thead>
-    <tbody>
-      @for (order of orders; track order.orderId) {
-        <tr>
-          <td>{{ order.orderId }}</td>
-          <td>{{ order.customerName }} (#{{ order.customerId }})</td>
-          <td>{{ order.title }}</td>
-          <td>
-            @for (item of order.items; track item.orderItemId) {
-              <span>{{ item.productName }} x{{ item.quantity }} </span>
+      <form [formGroup]="form" (ngSubmit)="save()" class="grid-form">
+        <label>
+          Customer
+          <select formControlName="customerId">
+            @for (user of customerUsers; track user.userId) {
+              <option [ngValue]="user.userId">{{ user.fullName }} (#{{ user.userId }})</option>
             }
-          </td>
-          <td>{{ order.totalPrice | number:'1.2-2' }}</td>
-          <td>
-            <select [value]="order.status" (change)="updateStatus(order, $event)">
-              <option value="Pending">Pending</option>
-              <option value="Completed">Completed</option>
-              <option value="Cancelled">Cancelled</option>
-            </select>
-          </td>
-          <td>
-            <button type="button" [disabled]="order.status !== 'Pending'" (click)="edit(order)">Edit</button>
-            <button type="button" (click)="delete(order)">Delete</button>
-          </td>
-        </tr>
-      }
-    </tbody>
-  </table>
+          </select>
+        </label>
 
-  @if (summary?.topProducts?.length) {
-    <h2>Top Products</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>Product</th>
-          <th>Qty</th>
-          <th>Revenue</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (product of summary?.topProducts; track product.productId) {
-          <tr>
-            <td>{{ product.productName }}</td>
-            <td>{{ product.totalQuantity }}</td>
-            <td>{{ product.totalRevenue | number:'1.2-2' }}</td>
-          </tr>
-        }
-      </tbody>
-    </table>
+        <label>
+          Title
+          <input formControlName="title" placeholder="Order title" />
+        </label>
+
+        <label>
+          Type
+          <select formControlName="type">
+            <option value="Dine-in">Dine-in</option>
+            <option value="Takeaway">Takeaway</option>
+            <option value="Delivery">Delivery</option>
+          </select>
+        </label>
+
+        <label>
+          Product
+          <select formControlName="productId">
+            @for (product of products; track product.productId) {
+              <option [ngValue]="product.productId">{{ product.productName }} — ฿{{ product.price | number:'1.0-0' }}</option>
+            }
+          </select>
+        </label>
+
+        <label>
+          Quantity
+          <input formControlName="quantity" type="number" min="1" />
+        </label>
+
+        <label class="grid-full">
+          Description
+          <input formControlName="description" placeholder="Note / item summary" />
+        </label>
+
+        <div class="form-footer grid-full">
+          <span class="muted">Estimated total: <strong>฿{{ editTotal | number:'1.0-0' }}</strong></span>
+          <div>
+            <button class="btn btn-soft" type="button" (click)="reset()">Cancel</button>
+            <button class="btn btn-primary" type="submit">Save order</button>
+          </div>
+        </div>
+      </form>
+    </section>
   }
+
+  <section class="dashboard-grid">
+    <section class="card orders-card wide-card">
+      <div class="section-title">
+        <div>
+          <p class="eyebrow">Orders</p>
+          <h2>จัดการออเดอร์</h2>
+        </div>
+        <div class="filter-row">
+          <input [(ngModel)]="searchTerm" placeholder="Search order/customer" />
+          <select [(ngModel)]="selectedStatus">
+            <option value="All">All status</option>
+            <option value="Pending">Pending</option>
+            <option value="Completed">Completed</option>
+            <option value="Cancelled">Cancelled</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Customer</th>
+              <th>Order</th>
+              <th>Items</th>
+              <th>Total</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (order of filteredOrders; track order.orderId) {
+              <tr>
+                <td>#{{ order.orderId }}</td>
+                <td>
+                  <strong>{{ order.customerName }}</strong>
+                  <small>ID: {{ order.customerId }}</small>
+                </td>
+                <td>
+                  <strong>{{ order.title }}</strong>
+                  <small>{{ order.type }} • {{ order.createdAt | date:'short' }}</small>
+                </td>
+                <td>
+                  <div class="item-list">
+                    @for (item of order.items; track item.orderItemId) {
+                      <span>{{ item.productName }} × {{ item.quantity }}</span>
+                    }
+                  </div>
+                </td>
+                <td>฿{{ order.totalPrice | number:'1.0-0' }}</td>
+                <td>
+                  <select class="status-select" [ngClass]="statusClass(order.status)" [value]="order.status" (change)="updateStatus(order, $event)">
+                    <option value="Pending">Pending</option>
+                    <option value="Completed">Completed</option>
+                    <option value="Cancelled">Cancelled</option>
+                  </select>
+                </td>
+                <td>
+                  <div class="action-row">
+                    <button class="btn btn-soft btn-small" type="button" [disabled]="order.status !== 'Pending'" (click)="edit(order)">Edit</button>
+                    <button class="btn btn-danger btn-small" type="button" (click)="delete(order)">Delete</button>
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="7" class="table-empty">ยังไม่มีออเดอร์ที่ตรงเงื่อนไข</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <aside class="card side-card">
+      <div class="section-title">
+        <div>
+          <p class="eyebrow">Top products</p>
+          <h2>ขายดี</h2>
+        </div>
+      </div>
+
+      @if (summary?.topProducts?.length) {
+        <div class="rank-list">
+          @for (product of summary?.topProducts; track product.productId) {
+            <div class="rank-item">
+              <div>
+                <strong>{{ product.productName }}</strong>
+                <small>{{ product.totalQuantity }} sold</small>
+              </div>
+              <span>฿{{ product.totalRevenue | number:'1.0-0' }}</span>
+            </div>
+          }
+        </div>
+      } @else {
+        <div class="empty-state soft">ยังไม่มีข้อมูลขายดี</div>
+      }
+    </aside>
+  </section>
 </main>

@@ -1,33 +1,66 @@
-<main>
-  <h1>ระบบสั่งอาหาร</h1>
+<main class="auth-page">
+  <section class="auth-hero">
+    <div class="brand-mark">🍽️</div>
+    <p class="eyebrow">Softsquare26 Food Ordering</p>
+    <h1>ระบบสั่งอาหารที่ดูง่ายขึ้น จบ flow ได้จริง</h1>
+    <p class="muted">
+      Customer สั่งอาหารและดูออเดอร์ตัวเองได้ ส่วน Admin จัดการเมนู หมวดหมู่ ออเดอร์ และดูยอดขายจาก Backend ได้เลย
+    </p>
 
-  <form [formGroup]="form" (ngSubmit)="submit()">
-    <h2>{{ mode === 'login' ? 'Login' : 'Register Customer' }}</h2>
+    <div class="hero-points">
+      <span>Fast order</span>
+      <span>Admin ready</span>
+      <span>JWT secured</span>
+    </div>
+  </section>
 
-    @if (mode === 'register') {
+  <section class="auth-card card">
+    <p class="eyebrow">{{ mode === 'login' ? 'Welcome back' : 'Create customer account' }}</p>
+    <h2>{{ mode === 'login' ? 'Login' : 'Register' }}</h2>
+    <p class="muted small-text">
+      {{ mode === 'login' ? 'เข้าสู่ระบบเพื่อเริ่มใช้งาน' : 'สมัครเป็น Customer เพื่อเริ่มสั่งอาหาร' }}
+    </p>
+
+    <form [formGroup]="form" (ngSubmit)="submit()" class="stack-form">
+      @if (mode === 'register') {
+        <label>
+          Full name
+          <input formControlName="fullName" placeholder="เช่น Boss Engineering" autocomplete="name" />
+          @if (form.controls.fullName.touched && form.controls.fullName.invalid) {
+            <small class="field-error">กรอกชื่อก่อน</small>
+          }
+        </label>
+      }
+
       <label>
-        Full name
-        <input formControlName="fullName" />
+        Email
+        <input formControlName="email" type="email" placeholder="name@example.com" autocomplete="email" />
+        @if (form.controls.email.touched && form.controls.email.invalid) {
+          <small class="field-error">อีเมลไม่ถูกต้อง</small>
+        }
       </label>
-    }
 
-    <label>
-      Email
-      <input formControlName="email" type="email" />
-    </label>
+      <label>
+        Password
+        <input formControlName="password" type="password" placeholder="อย่างน้อย 6 ตัวอักษร" autocomplete="current-password" />
+        @if (form.controls.password.touched && form.controls.password.invalid) {
+          <small class="field-error">รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร</small>
+        }
+      </label>
 
-    <label>
-      Password
-      <input formControlName="password" type="password" />
-    </label>
+      @if (error) {
+        <div class="alert alert-error">{{ error }}</div>
+      }
 
-    @if (error) {
-      <p class="error">{{ error }}</p>
-    }
-
-    <button type="submit">{{ mode === 'login' ? 'Login' : 'Register' }}</button>
-    <button type="button" (click)="mode = mode === 'login' ? 'register' : 'login'">
-      {{ mode === 'login' ? 'Create customer account' : 'Back to login' }}
-    </button>
-  </form>
+      <button class="btn btn-primary" type="submit" [disabled]="loading">
+        {{ loading ? 'กำลังดำเนินการ...' : (mode === 'login' ? 'Login' : 'Register') }}
+      </button>
+      <button class="btn btn-soft" type="button" (click)="switchMode()">
+        {{ mode === 'login' ? 'Create customer account' : 'Back to login' }}
+      </button>
+      <button class="btn btn-ghost" type="button" (click)="fillAdminDemo()">
+        ใช้ Admin demo: admin@example.com
+      </button>
+    </form>
+  </section>
 </main>

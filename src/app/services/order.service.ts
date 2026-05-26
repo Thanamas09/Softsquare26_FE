@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Order, OrderInput } from './models';
+import { ApiMessageResponse, Order, OrderInput, OrderStatus } from './models';
 
 @Injectable({ providedIn: 'root' })
 export class OrderService {
@@ -17,22 +17,22 @@ export class OrderService {
   }
 
   createOrder(order: OrderInput) {
-    return this.http.post<{ data: Order }>(`${this.apiUrl}/Orders`, order);
+    return this.http.post<ApiMessageResponse<Order>>(`${this.apiUrl}/Orders`, order);
   }
 
   updateOrder(id: number, order: OrderInput) {
-    return this.http.put(`${this.apiUrl}/Orders/${id}`, order);
+    return this.http.put<{ message: string }>(`${this.apiUrl}/Orders/${id}`, order);
   }
 
-  updateStatus(id: number, status: string) {
-    return this.http.patch(`${this.apiUrl}/Orders/${id}/status`, { status });
+  updateStatus(id: number, status: OrderStatus) {
+    return this.http.patch<{ message: string; orderId: number; status: OrderStatus }>(`${this.apiUrl}/Orders/${id}/status`, { status });
   }
 
   cancelOrder(id: number) {
-    return this.http.patch(`${this.apiUrl}/Orders/${id}/cancel`, {});
+    return this.http.patch<{ message: string; orderId: number; status: OrderStatus }>(`${this.apiUrl}/Orders/${id}/cancel`, {});
   }
 
   deleteOrder(id: number) {
-    return this.http.delete(`${this.apiUrl}/Orders/${id}`);
+    return this.http.delete<{ message: string }>(`${this.apiUrl}/Orders/${id}`);
   }
 }

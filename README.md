@@ -1,59 +1,59 @@
-# Softsquare26FE
+# Softsquare26 FE — Food Ordering System
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.12.
+Frontend นี้ปรับให้ยึด Backend จากโปรเจ็กต์ `Softsquare26_BE` เป็นหลัก โดยเรียก API ที่ `http://localhost:5124/api`
 
-## Development server
+## Flow ที่ทำไว้
 
-To start a local development server, run:
+- Login / Register ด้วย `Users/login` และ `Users/register`
+- Customer
+  - ดูเมนูจาก `Products`
+  - ค้นหา / กรองหมวดหมู่
+  - เพิ่มหลายเมนูลงตะกร้า
+  - สั่งอาหารผ่าน `Orders`
+  - ดูประวัติออเดอร์ของตัวเองผ่าน `Orders/customer/{customerId}`
+  - ยกเลิกออเดอร์ที่ยัง Pending ได้
+- Admin
+  - ดู Dashboard จาก `Dashboard/summary`
+  - ดู/ค้นหา/กรองออเดอร์ทั้งหมด
+  - เปลี่ยนสถานะ Pending / Completed / Cancelled
+  - แก้ไขหรือลบออเดอร์
+  - เพิ่ม/แก้ไข/ลบเมนู
+  - เพิ่ม/แก้ไข/ลบหมวดหมู่
 
-```bash
-ng serve
-```
+## วิธีรัน
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
+เปิด Backend ก่อน:
 
 ```bash
-ng build
+cd Softsquare26_BE-main
+dotnet run
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+จากนั้นเปิด Frontend:
 
 ```bash
-ng test
+cd Softsquare26_FE-main
+npm install
+npm start
 ```
 
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
+เปิดเว็บที่:
 
 ```bash
-ng e2e
+http://localhost:4200
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+## Admin demo
 
-## Additional Resources
+```txt
+email: admin@example.com
+password: admin123
+```
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+## Build check
+
+โปรเจ็กต์นี้ build ผ่านแล้วด้วยคำสั่ง:
+
+```bash
+npm run build
+```

@@ -1,90 +1,197 @@
-<main>
-  <nav>
-    <strong>Admin: {{ auth.user?.fullName }}</strong>
-    <a routerLink="/admin/dashboard">Dashboard</a>
-    <a routerLink="/admin/menu">Menu</a>
-    <button type="button" (click)="auth.logout()">Logout</button>
+<main class="app-shell">
+  <nav class="topbar">
+    <a class="brand" routerLink="/admin/dashboard">
+      <span class="brand-icon">⚡</span>
+      <span>FoodFlow Admin</span>
+    </a>
+
+    <div class="nav-links">
+      <a routerLink="/admin/dashboard">Dashboard</a>
+      <a routerLink="/admin/menu" class="active">Menu</a>
+    </div>
+
+    <div class="profile-chip">
+      <span class="avatar">{{ auth.initials() }}</span>
+      <span>{{ auth.user?.fullName }}</span>
+      <button class="btn btn-ghost btn-small" type="button" (click)="auth.logout()">Logout</button>
+    </div>
   </nav>
 
-  <h1>จัดการเมนู</h1>
+  <section class="page-header split-header">
+    <div>
+      <p class="eyebrow">Menu management</p>
+      <h1>จัดการเมนูและหมวดหมู่</h1>
+      <p class="muted">เพิ่ม แก้ไข เปิด/ปิดสถานะเมนู พร้อมจัดหมวดหมู่ให้ Customer เลือกง่ายขึ้น</p>
+    </div>
+    <div class="mini-summary card">
+      <span>Available</span>
+      <strong>{{ availableCount }}/{{ products.length }}</strong>
+      <small>{{ categories.length }} categories</small>
+    </div>
+  </section>
 
   @if (message) {
-    <p class="success">{{ message }}</p>
+    <div class="alert alert-success">{{ message }}</div>
   }
   @if (error) {
-    <p class="error">{{ error }}</p>
+    <div class="alert alert-error">{{ error }}</div>
   }
 
-  <form [formGroup]="categoryForm" (ngSubmit)="addCategory()">
-    <h2>Add Category</h2>
-    <label>
-      Category name
-      <input formControlName="categoryName" />
-    </label>
-    <button type="submit">Add category</button>
-  </form>
-
-  <form [formGroup]="form" (ngSubmit)="save()">
-    <h2>{{ editingId ? 'Edit Product' : 'Add Product' }}</h2>
-
-    <label>
-      Product name
-      <input formControlName="productName" />
-    </label>
-
-    <label>
-      Price
-      <input formControlName="price" type="number" min="0" />
-    </label>
-
-    <label>
-      Category
-      <select formControlName="categoryId">
-        @for (category of categories; track category.categoryId) {
-          <option [ngValue]="category.categoryId">{{ category.categoryName }}</option>
+  <section class="management-grid">
+    <section class="card form-card">
+      <div class="section-title">
+        <div>
+          <p class="eyebrow">Product</p>
+          <h2>{{ editingId ? 'แก้ไขเมนู' : 'เพิ่มเมนูใหม่' }}</h2>
+        </div>
+        @if (editingId) {
+          <button class="btn btn-ghost btn-small" type="button" (click)="resetProduct()">Clear</button>
         }
-      </select>
-    </label>
+      </div>
 
-    <label>
-      Image URL
-      <input formControlName="imageUrl" />
-    </label>
+      <form [formGroup]="form" (ngSubmit)="saveProduct()" class="stack-form">
+        <label>
+          Product name
+          <input formControlName="productName" placeholder="เช่น Fried Rice" />
+        </label>
 
-    <label class="inline">
-      <input formControlName="isAvailable" type="checkbox" />
-      Available
-    </label>
+        <div class="two-col">
+          <label>
+            Price
+            <input formControlName="price" type="number" min="0" />
+          </label>
+          <label>
+            Category
+            <select formControlName="categoryId">
+              @for (category of categories; track category.categoryId) {
+                <option [ngValue]="category.categoryId">{{ category.categoryName }}</option>
+              }
+            </select>
+          </label>
+        </div>
 
-    <button type="submit">{{ editingId ? 'Save' : 'Add' }}</button>
-    <button type="button" (click)="reset()">Clear</button>
-  </form>
+        <label>
+          Image URL
+          <input formControlName="imageUrl" placeholder="วางลิงก์รูปภาพ ถ้ามี" />
+        </label>
 
-  <table>
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>Menu</th>
-        <th>Category</th>
-        <th>Price</th>
-        <th>Available</th>
-        <th></th>
-      </tr>
-    </thead>
-    <tbody>
-      @for (product of products; track product.productId) {
-        <tr>
-          <td>{{ product.productId }}</td>
-          <td>{{ product.productName }}</td>
-          <td>{{ product.categoryName }}</td>
-          <td>{{ product.price | number:'1.2-2' }}</td>
-          <td>{{ product.isAvailable ? 'Yes' : 'No' }}</td>
-          <td>
-            <button type="button" (click)="edit(product)">Edit</button>
-            <button type="button" (click)="delete(product)">Delete</button>
-          </td>
-        </tr>
-      }
-    </tbody>
-  </table>
+        <label class="toggle-line">
+          <input formControlName="isAvailable" type="checkbox" />
+          <span>เปิดขายเมนูนี้</span>
+        </label>
+
+        <button class="btn btn-primary full-width" type="submit">{{ editingId ? 'Save product' : 'Add product' }}</button>
+      </form>
+    </section>
+
+    <section class="card form-card">
+      <div class="section-title">
+        <div>
+          <p class="eyebrow">Category</p>
+          <h2>{{ editingCategoryId ? 'แก้ไขหมวดหมู่' : 'เพิ่มหมวดหมู่' }}</h2>
+        </div>
+        @if (editingCategoryId) {
+          <button class="btn btn-ghost btn-small" type="button" (click)="resetCategory()">Clear</button>
+        }
+      </div>
+
+      <form [formGroup]="categoryForm" (ngSubmit)="saveCategory()" class="inline-form">
+        <input formControlName="categoryName" placeholder="Category name" />
+        <button class="btn btn-primary" type="submit">{{ editingCategoryId ? 'Save' : 'Add' }}</button>
+      </form>
+
+      <div class="category-list">
+        @for (category of categories; track category.categoryId) {
+          <div class="category-row">
+            <span>{{ category.categoryName }}</span>
+            <div>
+              <button class="btn btn-soft btn-small" type="button" (click)="editCategory(category)">Edit</button>
+              <button class="btn btn-danger btn-small" type="button" (click)="deleteCategory(category)">Delete</button>
+            </div>
+          </div>
+        } @empty {
+          <div class="empty-state soft">ยังไม่มีหมวดหมู่</div>
+        }
+      </div>
+    </section>
+  </section>
+
+  <section class="card products-table-card">
+    <div class="section-title">
+      <div>
+        <p class="eyebrow">Products</p>
+        <h2>รายการเมนูทั้งหมด</h2>
+      </div>
+      <div class="filter-row">
+        <input [(ngModel)]="searchTerm" placeholder="Search menu" />
+        <select [(ngModel)]="selectedCategoryId">
+          <option [ngValue]="0">All categories</option>
+          @for (category of categories; track category.categoryId) {
+            <option [ngValue]="category.categoryId">{{ category.categoryName }}</option>
+          }
+        </select>
+        <select [(ngModel)]="availabilityFilter">
+          <option value="All">All</option>
+          <option value="Available">Available</option>
+          <option value="Unavailable">Unavailable</option>
+        </select>
+      </div>
+    </div>
+
+    @if (loading) {
+      <div class="empty-state soft">กำลังโหลดเมนู...</div>
+    } @else {
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Menu</th>
+              <th>Category</th>
+              <th>Price</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (product of filteredProducts; track product.productId) {
+              <tr>
+                <td>
+                  <div class="table-product">
+                    <div class="tiny-thumb">
+                      @if (product.imageUrl) {
+                        <img [src]="product.imageUrl" [alt]="product.productName" />
+                      } @else {
+                        <span>{{ product.productName.charAt(0) }}</span>
+                      }
+                    </div>
+                    <div>
+                      <strong>{{ product.productName }}</strong>
+                      <small>ID: {{ product.productId }}</small>
+                    </div>
+                  </div>
+                </td>
+                <td>{{ product.categoryName || '-' }}</td>
+                <td>฿{{ product.price | number:'1.0-0' }}</td>
+                <td>
+                  <span class="pill" [class.pill-danger]="!product.isAvailable">
+                    {{ product.isAvailable ? 'Available' : 'Unavailable' }}
+                  </span>
+                </td>
+                <td>
+                  <div class="action-row">
+                    <button class="btn btn-soft btn-small" type="button" (click)="editProduct(product)">Edit</button>
+                    <button class="btn btn-danger btn-small" type="button" (click)="deleteProduct(product)">Delete</button>
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="5" class="table-empty">ไม่พบเมนูที่ตรงเงื่อนไข</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
 </main>

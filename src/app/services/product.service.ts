@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Category, Product, ProductInput } from './models';
+import { ApiMessageResponse, Category, Product, ProductInput } from './models';
 
 @Injectable({ providedIn: 'root' })
 export class ProductService {
@@ -12,23 +12,35 @@ export class ProductService {
     return this.http.get<Product[]>(`${this.apiUrl}/Products`);
   }
 
+  getProduct(id: number) {
+    return this.http.get<Product>(`${this.apiUrl}/Products/${id}`);
+  }
+
   getCategories() {
     return this.http.get<Category[]>(`${this.apiUrl}/Categories`);
   }
 
   createCategory(categoryName: string) {
-    return this.http.post<{ data: Category }>(`${this.apiUrl}/Categories`, { categoryName });
+    return this.http.post<ApiMessageResponse<Category>>(`${this.apiUrl}/Categories`, { categoryName });
+  }
+
+  updateCategory(id: number, categoryName: string) {
+    return this.http.put<ApiMessageResponse<Category>>(`${this.apiUrl}/Categories/${id}`, { categoryName });
+  }
+
+  deleteCategory(id: number) {
+    return this.http.delete<{ message: string }>(`${this.apiUrl}/Categories/${id}`);
   }
 
   createProduct(product: ProductInput) {
-    return this.http.post<{ data: Product }>(`${this.apiUrl}/Products`, product);
+    return this.http.post<ApiMessageResponse<Product>>(`${this.apiUrl}/Products`, product);
   }
 
   updateProduct(id: number, product: ProductInput) {
-    return this.http.put<{ data: Product }>(`${this.apiUrl}/Products/${id}`, product);
+    return this.http.put<ApiMessageResponse<Product>>(`${this.apiUrl}/Products/${id}`, product);
   }
 
   deleteProduct(id: number) {
-    return this.http.delete(`${this.apiUrl}/Products/${id}`);
+    return this.http.delete<{ message: string }>(`${this.apiUrl}/Products/${id}`);
   }
 }

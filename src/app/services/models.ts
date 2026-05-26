@@ -1,8 +1,12 @@
+export type UserRole = 'Admin' | 'Customer';
+export type OrderStatus = 'Pending' | 'Completed' | 'Cancelled';
+export type OrderType = 'Dine-in' | 'Takeaway' | 'Delivery';
+
 export interface User {
   userId: number;
   fullName: string;
   email: string;
-  role: 'Admin' | 'Customer';
+  role: UserRole;
 }
 
 export interface Category {
@@ -43,8 +47,8 @@ export interface Order {
   customerName: string;
   title: string;
   description: string;
-  status: 'Pending' | 'Completed' | 'Cancelled';
-  type: 'Dine-in' | 'Takeaway' | 'Delivery';
+  status: OrderStatus;
+  type: OrderType;
   totalPrice: number;
   createdAt: string;
   items: OrderItem[];
@@ -54,7 +58,7 @@ export interface OrderInput {
   customerId: number;
   title: string;
   description: string;
-  type: string;
+  type: OrderType;
   items: { productId: number; quantity: number }[];
 }
 
@@ -71,4 +75,9 @@ export interface DashboardSummary {
     totalQuantity: number;
     totalRevenue: number;
   }[];
+}
+
+export interface ApiMessageResponse<T> {
+  message: string;
+  data: T;
 }

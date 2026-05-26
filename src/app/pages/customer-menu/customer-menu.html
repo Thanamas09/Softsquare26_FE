@@ -1,76 +1,195 @@
-<main>
-  <nav>
-    <strong>Customer: {{ auth.user?.fullName }}</strong>
-    <a routerLink="/customer/menu">Menu</a>
-    <button type="button" (click)="auth.logout()">Logout</button>
+<main class="app-shell">
+  <nav class="topbar">
+    <a class="brand" routerLink="/customer/menu">
+      <span class="brand-icon">🍽️</span>
+      <span>FoodFlow</span>
+    </a>
+
+    <div class="nav-links">
+      <a routerLink="/customer/menu" class="active">Menu</a>
+    </div>
+
+    <div class="profile-chip">
+      <span class="avatar">{{ auth.initials() }}</span>
+      <span>{{ auth.user?.fullName }}</span>
+      <button class="btn btn-ghost btn-small" type="button" (click)="auth.logout()">Logout</button>
+    </div>
   </nav>
 
-  <h1>เมนูอาหาร</h1>
-
-  <label>
-    Order type
-    <select [(ngModel)]="orderType">
-      <option value="Dine-in">Dine-in</option>
-      <option value="Takeaway">Takeaway</option>
-      <option value="Delivery">Delivery</option>
-    </select>
-  </label>
+  <section class="page-header split-header">
+    <div>
+      <p class="eyebrow">Customer menu</p>
+      <h1>เลือกเมนู แล้วสั่งได้ในไม่กี่คลิก</h1>
+      <p class="muted">เพิ่มหลายเมนูลงตะกร้า เลือกประเภทออเดอร์ แล้วส่งเข้า Backend ได้ตรง ๆ</p>
+    </div>
+    <div class="mini-summary card">
+      <span>Cart</span>
+      <strong>{{ cartCount }}</strong>
+      <small>items • ฿{{ cartTotal | number:'1.0-0' }}</small>
+    </div>
+  </section>
 
   @if (message) {
-    <p class="success">{{ message }}</p>
+    <div class="alert alert-success">{{ message }}</div>
   }
   @if (error) {
-    <p class="error">{{ error }}</p>
+    <div class="alert alert-error">{{ error }}</div>
   }
 
-  <table>
-    <thead>
-      <tr>
-        <th>Menu</th>
-        <th>Category</th>
-        <th>Price</th>
-        <th>Status</th>
-        <th></th>
-      </tr>
-    </thead>
-    <tbody>
-      @for (product of products; track product.productId) {
-        <tr>
-          <td>{{ product.productName }}</td>
-          <td>{{ product.categoryName }}</td>
-          <td>{{ product.price | number:'1.2-2' }}</td>
-          <td>{{ product.isAvailable ? 'Available' : 'Unavailable' }}</td>
-          <td>
-            <button type="button" [disabled]="!product.isAvailable" (click)="order(product)">สั่ง</button>
-          </td>
-        </tr>
-      }
-    </tbody>
-  </table>
+  <section class="customer-layout">
+    <div class="menu-panel">
+      <div class="toolbar card">
+        <label class="search-box">
+          ค้นหาเมนู
+          <input [(ngModel)]="searchTerm" placeholder="เช่น rice, tea, food" />
+        </label>
+        <label>
+          หมวดหมู่
+          <select [(ngModel)]="selectedCategory">
+            <option value="All">ทั้งหมด</option>
+            @for (category of categoryNames; track category) {
+              <option [value]="category">{{ category }}</option>
+            }
+          </select>
+        </label>
+      </div>
 
-  <h2>ออเดอร์ของฉัน</h2>
-  <table>
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>Order</th>
-        <th>Status</th>
-        <th>Total</th>
-        <th></th>
-      </tr>
-    </thead>
-    <tbody>
-      @for (order of orders; track order.orderId) {
-        <tr>
-          <td>{{ order.orderId }}</td>
-          <td>{{ order.title }}</td>
-          <td>{{ order.status }}</td>
-          <td>{{ order.totalPrice | number:'1.2-2' }}</td>
-          <td>
-            <button type="button" [disabled]="order.status !== 'Pending'" (click)="cancel(order)">Cancel</button>
-          </td>
-        </tr>
+      @if (loadingProducts) {
+        <div class="empty-state card">กำลังโหลดเมนู...</div>
+      } @else {
+        <div class="product-grid">
+          @for (product of filteredProducts; track product.productId) {
+            <article class="product-card card" [class.unavailable]="!product.isAvailable">
+              <div class="food-thumb">
+                @if (product.imageUrl) {
+                  <img [src]="product.imageUrl" [alt]="product.productName" />
+                } @else {
+                  <span>{{ product.productName.charAt(0) }}</span>
+                }
+              </div>
+              <div class="product-content">
+                <div class="product-title-row">
+                  <h3>{{ product.productName }}</h3>
+                  <strong>฿{{ product.price | number:'1.0-0' }}</strong>
+                </div>
+                <p class="muted small-text">{{ product.categoryName || 'No category' }}</p>
+                <div class="card-actions">
+                  <span class="pill" [class.pill-danger]="!product.isAvailable">
+                    {{ product.isAvailable ? 'Available' : 'Unavailable' }}
+                  </span>
+                  <button class="btn btn-primary btn-small" type="button" [disabled]="!product.isAvailable" (click)="addToCart(product)">
+                    Add
+                  </button>
+                </div>
+              </div>
+            </article>
+          } @empty {
+            <div class="empty-state card">ไม่พบเมนูที่ค้นหา</div>
+          }
+        </div>
       }
-    </tbody>
-  </table>
+    </div>
+
+    <aside class="cart-panel card">
+      <div class="section-title">
+        <div>
+          <p class="eyebrow">Your cart</p>
+          <h2>ตะกร้าของฉัน</h2>
+        </div>
+        @if (cart.length) {
+          <button class="btn btn-ghost btn-small" type="button" (click)="clearCart()">Clear</button>
+        }
+      </div>
+
+      <label>
+        Order type
+        <select [(ngModel)]="orderType">
+          <option value="Dine-in">Dine-in</option>
+          <option value="Takeaway">Takeaway</option>
+          <option value="Delivery">Delivery</option>
+        </select>
+      </label>
+
+      <div class="cart-list">
+        @for (item of cart; track item.product.productId) {
+          <div class="cart-item">
+            <div>
+              <strong>{{ item.product.productName }}</strong>
+              <small>฿{{ item.product.price | number:'1.0-0' }} / item</small>
+            </div>
+            <div class="qty-control">
+              <button type="button" (click)="decrease(item)">−</button>
+              <input [value]="item.quantity" type="number" min="1" (change)="setQuantity(item, $event)" />
+              <button type="button" (click)="increase(item)">+</button>
+            </div>
+            <button class="icon-btn" type="button" aria-label="remove" (click)="removeFromCart(item.product.productId)">×</button>
+          </div>
+        } @empty {
+          <div class="empty-state soft">ยังไม่มีเมนูในตะกร้า</div>
+        }
+      </div>
+
+      <div class="cart-total">
+        <span>Total</span>
+        <strong>฿{{ cartTotal | number:'1.0-0' }}</strong>
+      </div>
+      <button class="btn btn-primary full-width" type="button" [disabled]="!cart.length || submitting" (click)="submitOrder()">
+        {{ submitting ? 'กำลังส่งออเดอร์...' : 'Place order' }}
+      </button>
+    </aside>
+  </section>
+
+  <section class="card orders-card">
+    <div class="section-title">
+      <div>
+        <p class="eyebrow">Order history</p>
+        <h2>ออเดอร์ของฉัน</h2>
+      </div>
+      <button class="btn btn-soft btn-small" type="button" (click)="loadOrders()">Refresh</button>
+    </div>
+
+    @if (loadingOrders) {
+      <div class="empty-state soft">กำลังโหลดออเดอร์...</div>
+    } @else {
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Order</th>
+              <th>Type</th>
+              <th>Status</th>
+              <th>Total</th>
+              <th>Date</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (order of orders; track order.orderId) {
+              <tr>
+                <td>#{{ order.orderId }}</td>
+                <td>
+                  <strong>{{ order.title }}</strong>
+                  <small>{{ order.description }}</small>
+                </td>
+                <td>{{ order.type }}</td>
+                <td><span class="status" [ngClass]="statusClass(order.status)">{{ order.status }}</span></td>
+                <td>฿{{ order.totalPrice | number:'1.0-0' }}</td>
+                <td>{{ order.createdAt | date:'short' }}</td>
+                <td>
+                  <button class="btn btn-soft btn-small" type="button" [disabled]="order.status !== 'Pending'" (click)="cancel(order)">
+                    Cancel
+                  </button>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="7" class="table-empty">ยังไม่มีออเดอร์</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
 </main>
