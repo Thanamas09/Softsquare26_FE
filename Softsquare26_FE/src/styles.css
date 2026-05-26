@@ -1,1 +1,85 @@
-/* You can add global styles to this file, and also import other style files */
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  color: #111;
+}
+
+main {
+  max-width: 1000px;
+  margin: 24px auto;
+  padding: 0 16px;
+}
+
+nav {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+form {
+  display: grid;
+  gap: 12px;
+  max-width: 420px;
+  margin-bottom: 24px;
+}
+
+label {
+  display: grid;
+  gap: 4px;
+}
+
+label.inline {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+input,
+select,
+button {
+  padding: 8px;
+  font: inherit;
+}
+
+button,
+a {
+  cursor: pointer;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 12px 0 28px;
+}
+
+th,
+td {
+  border: 1px solid #ccc;
+  padding: 8px;
+  text-align: left;
+}
+
+th {
+  background: #eee;
+}
+
+.stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.stats p {
+  border: 1px solid #ccc;
+  padding: 8px;
+  margin: 0;
+}
+
+.success {
+  color: #176d24;
+}
+
+.error {
+  color: #b00020;
+}

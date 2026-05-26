@@ -1,0 +1,90 @@
+<main>
+  <nav>
+    <strong>Admin: {{ auth.user?.fullName }}</strong>
+    <a routerLink="/admin/dashboard">Dashboard</a>
+    <a routerLink="/admin/menu">Menu</a>
+    <button type="button" (click)="auth.logout()">Logout</button>
+  </nav>
+
+  <h1>จัดการเมนู</h1>
+
+  @if (message) {
+    <p class="success">{{ message }}</p>
+  }
+  @if (error) {
+    <p class="error">{{ error }}</p>
+  }
+
+  <form [formGroup]="categoryForm" (ngSubmit)="addCategory()">
+    <h2>Add Category</h2>
+    <label>
+      Category name
+      <input formControlName="categoryName" />
+    </label>
+    <button type="submit">Add category</button>
+  </form>
+
+  <form [formGroup]="form" (ngSubmit)="save()">
+    <h2>{{ editingId ? 'Edit Product' : 'Add Product' }}</h2>
+
+    <label>
+      Product name
+      <input formControlName="productName" />
+    </label>
+
+    <label>
+      Price
+      <input formControlName="price" type="number" min="0" />
+    </label>
+
+    <label>
+      Category
+      <select formControlName="categoryId">
+        @for (category of categories; track category.categoryId) {
+          <option [ngValue]="category.categoryId">{{ category.categoryName }}</option>
+        }
+      </select>
+    </label>
+
+    <label>
+      Image URL
+      <input formControlName="imageUrl" />
+    </label>
+
+    <label class="inline">
+      <input formControlName="isAvailable" type="checkbox" />
+      Available
+    </label>
+
+    <button type="submit">{{ editingId ? 'Save' : 'Add' }}</button>
+    <button type="button" (click)="reset()">Clear</button>
+  </form>
+
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Menu</th>
+        <th>Category</th>
+        <th>Price</th>
+        <th>Available</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (product of products; track product.productId) {
+        <tr>
+          <td>{{ product.productId }}</td>
+          <td>{{ product.productName }}</td>
+          <td>{{ product.categoryName }}</td>
+          <td>{{ product.price | number:'1.2-2' }}</td>
+          <td>{{ product.isAvailable ? 'Yes' : 'No' }}</td>
+          <td>
+            <button type="button" (click)="edit(product)">Edit</button>
+            <button type="button" (click)="delete(product)">Delete</button>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</main>

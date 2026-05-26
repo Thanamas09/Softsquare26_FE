@@ -1,0 +1,33 @@
+<main>
+  <h1>ระบบสั่งอาหาร</h1>
+
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <h2>{{ mode === 'login' ? 'Login' : 'Register Customer' }}</h2>
+
+    @if (mode === 'register') {
+      <label>
+        Full name
+        <input formControlName="fullName" />
+      </label>
+    }
+
+    <label>
+      Email
+      <input formControlName="email" type="email" />
+    </label>
+
+    <label>
+      Password
+      <input formControlName="password" type="password" />
+    </label>
+
+    @if (error) {
+      <p class="error">{{ error }}</p>
+    }
+
+    <button type="submit">{{ mode === 'login' ? 'Login' : 'Register' }}</button>
+    <button type="button" (click)="mode = mode === 'login' ? 'register' : 'login'">
+      {{ mode === 'login' ? 'Create customer account' : 'Back to login' }}
+    </button>
+  </form>
+</main>

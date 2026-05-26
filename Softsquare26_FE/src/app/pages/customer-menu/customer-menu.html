@@ -1,0 +1,76 @@
+<main>
+  <nav>
+    <strong>Customer: {{ auth.user?.fullName }}</strong>
+    <a routerLink="/customer/menu">Menu</a>
+    <button type="button" (click)="auth.logout()">Logout</button>
+  </nav>
+
+  <h1>เมนูอาหาร</h1>
+
+  <label>
+    Order type
+    <select [(ngModel)]="orderType">
+      <option value="Dine-in">Dine-in</option>
+      <option value="Takeaway">Takeaway</option>
+      <option value="Delivery">Delivery</option>
+    </select>
+  </label>
+
+  @if (message) {
+    <p class="success">{{ message }}</p>
+  }
+  @if (error) {
+    <p class="error">{{ error }}</p>
+  }
+
+  <table>
+    <thead>
+      <tr>
+        <th>Menu</th>
+        <th>Category</th>
+        <th>Price</th>
+        <th>Status</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (product of products; track product.productId) {
+        <tr>
+          <td>{{ product.productName }}</td>
+          <td>{{ product.categoryName }}</td>
+          <td>{{ product.price | number:'1.2-2' }}</td>
+          <td>{{ product.isAvailable ? 'Available' : 'Unavailable' }}</td>
+          <td>
+            <button type="button" [disabled]="!product.isAvailable" (click)="order(product)">สั่ง</button>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+
+  <h2>ออเดอร์ของฉัน</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Order</th>
+        <th>Status</th>
+        <th>Total</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (order of orders; track order.orderId) {
+        <tr>
+          <td>{{ order.orderId }}</td>
+          <td>{{ order.title }}</td>
+          <td>{{ order.status }}</td>
+          <td>{{ order.totalPrice | number:'1.2-2' }}</td>
+          <td>
+            <button type="button" [disabled]="order.status !== 'Pending'" (click)="cancel(order)">Cancel</button>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</main>

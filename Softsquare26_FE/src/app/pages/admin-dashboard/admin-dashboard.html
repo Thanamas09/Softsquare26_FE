@@ -1,0 +1,137 @@
+<main>
+  <nav>
+    <strong>Admin: {{ auth.user?.fullName }}</strong>
+    <a routerLink="/admin/dashboard">Dashboard</a>
+    <a routerLink="/admin/menu">Menu</a>
+    <button type="button" (click)="auth.logout()">Logout</button>
+  </nav>
+
+  <h1>Admin Dashboard</h1>
+
+  @if (summary) {
+    <section class="stats">
+      <p>Total: {{ summary.totalOrders }}</p>
+      <p>Pending: {{ summary.pendingOrders }}</p>
+      <p>Completed: {{ summary.completedOrders }}</p>
+      <p>Cancelled: {{ summary.cancelledOrders }}</p>
+      <p>Sales: {{ summary.totalSales | number:'1.2-2' }}</p>
+    </section>
+  }
+
+  @if (message) {
+    <p class="success">{{ message }}</p>
+  }
+  @if (error) {
+    <p class="error">{{ error }}</p>
+  }
+
+  @if (editingId) {
+    <form [formGroup]="form" (ngSubmit)="save()">
+      <h2>Edit Order #{{ editingId }}</h2>
+
+      <label>
+        Customer ID
+        <input formControlName="customerId" type="number" min="1" />
+      </label>
+
+      <label>
+        Title
+        <input formControlName="title" />
+      </label>
+
+      <label>
+        Description
+        <input formControlName="description" />
+      </label>
+
+      <label>
+        Type
+        <select formControlName="type">
+          <option value="Dine-in">Dine-in</option>
+          <option value="Takeaway">Takeaway</option>
+          <option value="Delivery">Delivery</option>
+        </select>
+      </label>
+
+      <label>
+        Product
+        <select formControlName="productId">
+          @for (product of products; track product.productId) {
+            <option [ngValue]="product.productId">{{ product.productName }}</option>
+          }
+        </select>
+      </label>
+
+      <label>
+        Quantity
+        <input formControlName="quantity" type="number" min="1" />
+      </label>
+
+      <button type="submit">Save order</button>
+      <button type="button" (click)="reset()">Cancel edit</button>
+    </form>
+  }
+
+  <h2>Orders</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Customer</th>
+        <th>Order</th>
+        <th>Items</th>
+        <th>Total</th>
+        <th>Status</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (order of orders; track order.orderId) {
+        <tr>
+          <td>{{ order.orderId }}</td>
+          <td>{{ order.customerName }} (#{{ order.customerId }})</td>
+          <td>{{ order.title }}</td>
+          <td>
+            @for (item of order.items; track item.orderItemId) {
+              <span>{{ item.productName }} x{{ item.quantity }} </span>
+            }
+          </td>
+          <td>{{ order.totalPrice | number:'1.2-2' }}</td>
+          <td>
+            <select [value]="order.status" (change)="updateStatus(order, $event)">
+              <option value="Pending">Pending</option>
+              <option value="Completed">Completed</option>
+              <option value="Cancelled">Cancelled</option>
+            </select>
+          </td>
+          <td>
+            <button type="button" [disabled]="order.status !== 'Pending'" (click)="edit(order)">Edit</button>
+            <button type="button" (click)="delete(order)">Delete</button>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+
+  @if (summary?.topProducts?.length) {
+    <h2>Top Products</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>Qty</th>
+          <th>Revenue</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (product of summary?.topProducts; track product.productId) {
+          <tr>
+            <td>{{ product.productName }}</td>
+            <td>{{ product.totalQuantity }}</td>
+            <td>{{ product.totalRevenue | number:'1.2-2' }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</main>
