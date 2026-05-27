@@ -177,7 +177,7 @@ export class CustomerMenuComponent implements OnInit {
     }).subscribe({
       next: () => {
         this.submitting = false;
-        this.message = 'สั่งอาหารสำเร็จแล้ว รอ Admin ยืนยันสถานะได้เลย';
+        this.message = 'สั่งอาหารสำเร็จแล้ว รอร้านอาหารยืนยันสถานะได้เลย';
         this.clearCart();
         this.loadOrders();
         this.cdr.detectChanges();

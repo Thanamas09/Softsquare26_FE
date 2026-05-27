@@ -3,23 +3,16 @@
     <div class="brand-mark">🍽️</div>
     <p class="eyebrow">Softsquare26 Food Ordering</p>
     <h1>ระบบสั่งอาหาร</h1>
-    <p class="muted">
-      Customer สั่งอาหารและดูออเดอร์ตัวเองได้ ส่วน Admin จัดการเมนู หมวดหมู่ ออเดอร์ และดูยอดขายจาก Backend ได้เลย
-    </p>
-
     <div class="hero-points">
-      <span>Fast order</span>
-      <span>Admin ready</span>
-      <span>JWT secured</span>
+      <span>Easy order</span>
+      <span>Order tracking</span>
+      <span>Secure login</span>
     </div>
   </section>
 
   <section class="auth-card card">
-    <p class="eyebrow">{{ mode === 'login' ? 'Welcome back' : 'Create customer account' }}</p>
+    <p class="eyebrow">{{ mode === 'login' ? 'Member access' : 'New account' }}</p>
     <h2>{{ mode === 'login' ? 'Login' : 'Register' }}</h2>
-    <p class="muted small-text">
-      {{ mode === 'login' ? 'เข้าสู่ระบบเพื่อเริ่มใช้งาน' : 'สมัครเป็น Customer เพื่อเริ่มสั่งอาหาร' }}
-    </p>
 
     <form [formGroup]="form" (ngSubmit)="submit()" class="stack-form">
       @if (mode === 'register') {
@@ -57,9 +50,6 @@
       </button>
       <button class="btn btn-soft" type="button" (click)="switchMode()">
         {{ mode === 'login' ? 'Create customer account' : 'Back to login' }}
-      </button>
-      <button class="btn btn-ghost" type="button" (click)="fillAdminDemo()">
-        ใช้ Admin demo: admin@example.com
       </button>
     </form>
   </section>

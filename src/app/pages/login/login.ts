@@ -72,9 +72,4 @@ export class LoginComponent implements OnInit {
     this.error = '';
     this.form.reset({ fullName: '', email: '', password: '' });
   }
-
-  fillAdminDemo() {
-    this.mode = 'login';
-    this.form.patchValue({ email: 'admin@example.com', password: 'admin123' });
-  }
 }
